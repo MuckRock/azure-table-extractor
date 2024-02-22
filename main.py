@@ -105,8 +105,8 @@ class TableExtractor(AddOn):
                 csv_data.append(csv_row)
         return csv_data
 
-    def save_to_csv(self, csv_data, csv_file):
-        with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
+    def save_to_csv(self, csv_data, csv_filepath):
+        with open(csv_filepath, "a", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
             for row in csv_data:
                 writer.writerow(row)
@@ -165,12 +165,9 @@ class TableExtractor(AddOn):
                 zipf.writestr(output_file_path, table_data_json)
             if output_format == "csv":
                 output_file_path = f"tables-{document.id}.csv"
-                with zipf.open(output_file_path, "w") as csv_file:
-                    writer = csv.writer(csv_file)
-                    writer.writerow(["Page Number", "Row Index", "Column Index", "Content"])
                 csv_data = self.convert_to_csv(table_data)
-                self.save_to_csv(csv_data, csv_file)
-                zipf.write(csv_file)
+                self.save_to_csv(csv_data, output_file_path)
+                zipf.write(output_file_path)
 
         # Upload the zip file
         with open(zip_filename, "rb") as f:
