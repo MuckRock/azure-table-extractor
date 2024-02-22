@@ -5,6 +5,8 @@ import os
 import csv
 import sys
 import json
+import requests
+from PIL import Image
 from documentcloud.addon import AddOn
 from documentcloud.exceptions import APIError
 from azure.ai.formrecognizer import DocumentAnalysisClient
@@ -78,6 +80,17 @@ class TableExtractor(AddOn):
 
         return table_data
 
+    def download_image(self, url, filename):
+        """Download an image from a URL and save it locally."""
+        response = requests.get(url)
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+
+    def convert_to_png(self, gif_filename, png_filename):
+        """Convert a GIF image to PNG format."""
+        gif_image = Image.open(gif_filename)
+        gif_image.save(png_filename, 'PNG')
+
     def convert_to_csv(self, table_data):
         """Convert table data to CSV format"""
         csv_data = []
@@ -125,10 +138,15 @@ class TableExtractor(AddOn):
             if end_page > document.page_count:
                 outer_bound = document.page_count + 1
             for page_number in range(start_page, outer_bound):
-                image_url = document.get_large_image_url(page_number)
-                poller = document_analysis_client.begin_analyze_document_from_url(
-                    "prebuilt-layout", image_url
-                )
+                image_url = document.get_large_image(page_number)
+                gif_filename = f"{document.id}-page{page_number}.gif"
+                page_image = self.download_image(image_url, gif_filename)
+                png_filename = f"{document.id}-page{page_number}.png"
+                self.convert_to_png(gif_filename, png_filename)
+                with open(png_filename, "rb") as f:
+                    poller = document_analysis_client.begin_analyze_document(
+                        "prebuilt-layout", document=f
+                    )
                 result = poller.result()
                 table_data.extend(self.get_table_data(result))
 

@@ -1,2 +1,3 @@
 python_documentcloud==4.0.1
 azure-ai-formrecognizer
+Pillow
