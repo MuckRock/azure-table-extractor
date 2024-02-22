@@ -5,6 +5,7 @@ import os
 import csv
 import sys
 import json
+import zipfile
 import requests
 from PIL import Image
 from documentcloud.addon import AddOn
@@ -132,37 +133,42 @@ class TableExtractor(AddOn):
             endpoint=endpoint, credential=AzureKeyCredential(key)
         )
 
-        for document in self.get_documents():
-            table_data = []
-            outer_bound = end_page + 1
-            if end_page > document.page_count:
-                outer_bound = document.page_count + 1
-            for page_number in range(start_page, outer_bound):
-                image_url = document.get_large_image_url(page_number)
-                gif_filename = f"{document.id}-page{page_number}.gif"
-                self.download_image(image_url, gif_filename)
-                png_filename = f"{document.id}-page{page_number}.png"
-                self.convert_to_png(gif_filename, png_filename)
-                with open(png_filename, "rb") as f:
-                    poller = document_analysis_client.begin_analyze_document(
-                        "prebuilt-layout", document=f
-                    )
-                result = poller.result()
-                table_data.extend(self.get_table_data(result, page_number))
+        zip_filename = "tables.zip"
+        with zipfile.ZipFile(zip_filename, "w") as zipf:
+            for document in self.get_documents():
+                table_data = []
+                outer_bound = end_page + 1
+                if end_page > document.page_count:
+                    outer_bound = document.page_count + 1
+                for page_number in range(start_page, outer_bound):
+                    image_url = document.get_large_image_url(page_number)
+                    gif_filename = f"{document.id}-page{page_number}.gif"
+                    self.download_image(image_url, gif_filename)
+                    png_filename = f"{document.id}-page{page_number}.png"
+                    self.convert_to_png(gif_filename, png_filename)
+                    with open(png_filename, "rb") as f:
+                        poller = document_analysis_client.begin_analyze_document(
+                            "prebuilt-layout", document=f
+                        )
+                    result = poller.result()
+                    table_data.extend(self.get_table_data(result, page_number))
 
-            if output_format == "json":
-                table_data_json = json.dumps(table_data, indent=4)
-                output_file_path = f"tables-{document.id}.json"
-                with open(output_file_path, "w", encoding="utf-8") as json_file:
-                    json_file.write(table_data_json)
-            if output_format == "csv":
-                output_file_path = f"tables-{document.id}.csv"
-                with open(output_file_path, "a", newline="", encoding="utf-8") as csv_file:
-                    writer = csv.writer(csv_file)
-                    if csv_file.tell() == 0:
-                        writer.writerow(["Page Number", "Row Index", "Column Index", "Content"])
-                    csv_data = self.convert_to_csv(table_data)
-                    writer.writerows(csv_data)
+                if output_format == "json":
+                    table_data_json = json.dumps(table_data, indent=4)
+                    output_file_path = f"tables-{document.id}.json"
+                    zipf.writestr(output_file_path, table_data_json)
+                if output_format == "csv":
+                    output_file_path = f"tables-{document.id}.csv"
+                    with zipf.open(output_file_path, "w") as csv_file:
+                        writer = csv.writer(csv_file)
+                        if csv_file.tell() == 0:
+                            writer.writerow(["Page Number", "Row Index", "Column Index", "Content"])
+                        csv_data = self.convert_to_csv(table_data)
+                        writer.writerows(csv_data)
+
+        # Upload the zip file
+        with open(zip_filename, "rb") as f:
+            self.upload_file(f)
 
 
 if __name__ == "__main__":
