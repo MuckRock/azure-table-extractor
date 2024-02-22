@@ -1,2 +1,2 @@
-python-documentcloud==3.7.1
-requests
+python_documentcloud==4.0.1
+azure-ai-formrecognizer
