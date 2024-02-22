@@ -99,13 +99,15 @@ class TableExtractor(AddOn):
             page_number = table_info["page_number"]
             max_row_index = max(cell["row_index"] for cell in table_info["cells"]) + 1
             rows = [[] for _ in range(max_row_index)]
+            first_row = ["Page Number:", page_number]
+            csv_data.append(first_row)
             for cell in table_info["cells"]:
                 row_index = cell["row_index"]
                 column_index = cell["column_index"]
                 content = cell["content"]
                 rows[row_index].append(content)
             for row_index, row_content in enumerate(rows):
-                csv_row = [page_number] + row_content
+                csv_row = row_content
                 csv_data.append(csv_row)
         return csv_data
 
