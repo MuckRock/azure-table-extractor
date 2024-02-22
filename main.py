@@ -56,13 +56,13 @@ class TableExtractor(AddOn):
             return False
         return True
 
-    def get_table_data(self, result):
+    def get_table_data(self, result, page_number):
         """Extract table data from the result of the poller"""
         table_data = []
 
         for table in result.tables:
             table_info = {
-                "page_number": table.page_number,
+                "page_number": page_number,
                 "cells": []
             }
 
@@ -148,7 +148,7 @@ class TableExtractor(AddOn):
                         "prebuilt-layout", document=f
                     )
                 result = poller.result()
-                table_data.extend(self.get_table_data(result))
+                table_data.extend(self.get_table_data(result, page_number))
 
             if output_format == "json":
                 table_data_json = json.dumps(table_data, indent=4)
