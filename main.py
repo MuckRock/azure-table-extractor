@@ -71,7 +71,7 @@ class TableExtractor(AddOn):
                 cell_info = {
                     "row_index": cell.row_index,
                     "column_index": cell.column_index,
-                    "content": cell.text
+                    "content": cell.content
                 }
                 table_info["cells"].append(cell_info)
 
