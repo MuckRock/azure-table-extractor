@@ -82,8 +82,7 @@ class TableExtractor(AddOn):
 
     def download_image(self, url, filename):
         """Download an image from a URL and save it locally."""
-        print(url)
-        response = requests.get(url)
+        response = requests.get(url, timeout=20)
         with open(filename, 'wb') as f:
             f.write(response.content)
 
@@ -139,9 +138,9 @@ class TableExtractor(AddOn):
             if end_page > document.page_count:
                 outer_bound = document.page_count + 1
             for page_number in range(start_page, outer_bound):
-                image_url = document.get_large_image(page_number)
+                image_url = document.get_large_image_url(page_number)
                 gif_filename = f"{document.id}-page{page_number}.gif"
-                page_image = self.download_image(image_url, gif_filename)
+                self.download_image(image_url, gif_filename)
                 png_filename = f"{document.id}-page{page_number}.png"
                 self.convert_to_png(gif_filename, png_filename)
                 with open(png_filename, "rb") as f:
