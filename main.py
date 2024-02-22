@@ -159,9 +159,9 @@ class TableExtractor(AddOn):
                     zipf.writestr(output_file_path, table_data_json)
                 if output_format == "csv":
                     output_file_path = f"tables-{document.id}.csv"
-                    with zipf.open(output_file_path, "wb") as csv_file:
+                    with zipf.open(output_file_path, "w") as csv_file:
                         writer = csv.writer(csv_file)
-                        writer.writerow(["Page Number", "Row Index", "Column Index", "Content"])
+                        writer.writerow([b"Page Number", b"Row Index", b"Column Index", b"Content"])
                         csv_data = self.convert_to_csv(table_data)
                         writer.writerows(csv_data)
 
