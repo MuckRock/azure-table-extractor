@@ -97,11 +97,15 @@ class TableExtractor(AddOn):
         csv_data = []
         for table_info in table_data:
             page_number = table_info["page_number"]
+            max_row_index = max(cell["row_index"] for cell in table_info["cells"]) + 1
+            rows = [[] for _ in range(max_row_index)]
             for cell in table_info["cells"]:
                 row_index = cell["row_index"]
                 column_index = cell["column_index"]
                 content = cell["content"]
-                csv_row = [page_number, row_index, column_index, content]
+                rows[row_index].append(content)
+            for row_index, row_content in enumerate(rows):
+                csv_row = [page_number] + row_content
                 csv_data.append(csv_row)
         return csv_data
 
@@ -169,7 +173,7 @@ class TableExtractor(AddOn):
                 self.save_to_csv(csv_data, output_file_path)
                 zipf.write(output_file_path)
         zipf.close() 
-        
+
         # Upload the zip file
         with open(zip_filename, "rb") as f:
             self.upload_file(f)
