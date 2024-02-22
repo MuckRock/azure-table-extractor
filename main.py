@@ -105,6 +105,12 @@ class TableExtractor(AddOn):
                 csv_data.append(csv_row)
         return csv_data
 
+    def save_to_csv(self, csv_data, csv_file):
+        with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            for row in csv_data:
+                writer.writerow(row)
+
     def main(self):
         """Validate, run the extraction on each document, save results in a zip file"""
         output_format = self.data.get("output_format", "json")
@@ -134,37 +140,37 @@ class TableExtractor(AddOn):
         )
 
         zip_filename = "tables.zip"
-        with zipfile.ZipFile(zip_filename, "w") as zipf:
-            for document in self.get_documents():
-                table_data = []
-                outer_bound = end_page + 1
-                if end_page > document.page_count:
-                    outer_bound = document.page_count + 1
-                for page_number in range(start_page, outer_bound):
-                    image_url = document.get_large_image_url(page_number)
-                    gif_filename = f"{document.id}-page{page_number}.gif"
-                    self.download_image(image_url, gif_filename)
-                    png_filename = f"{document.id}-page{page_number}.png"
-                    self.convert_to_png(gif_filename, png_filename)
-                    with open(png_filename, "rb") as f:
-                        poller = document_analysis_client.begin_analyze_document(
-                            "prebuilt-layout", document=f
-                        )
-                    result = poller.result()
-                    table_data.extend(self.get_table_data(result, page_number))
+        zipf = zipfile.ZipFile(zip_filename, "w")
+        for document in self.get_documents():
+            table_data = []
+            outer_bound = end_page + 1
+            if end_page > document.page_count:
+                outer_bound = document.page_count + 1
+            for page_number in range(start_page, outer_bound):
+                image_url = document.get_large_image_url(page_number)
+                gif_filename = f"{document.id}-page{page_number}.gif"
+                self.download_image(image_url, gif_filename)
+                png_filename = f"{document.id}-page{page_number}.png"
+                self.convert_to_png(gif_filename, png_filename)
+                with open(png_filename, "rb") as f:
+                    poller = document_analysis_client.begin_analyze_document(
+                        "prebuilt-layout", document=f
+                    )
+                result = poller.result()
+                table_data.extend(self.get_table_data(result, page_number))
 
-                if output_format == "json":
-                    table_data_json = json.dumps(table_data, indent=4)
-                    output_file_path = f"tables-{document.id}.json"
-                    zipf.writestr(output_file_path, table_data_json)
-                if output_format == "csv":
-                    output_file_path = f"tables-{document.id}.csv"
-                    with zipf.open(output_file_path, "w") as csv_file:
-                        writer = csv.writer(csv_file)
-                        writer.writerow([b"Page Number", b"Row Index", b"Column Index", b"Content"])
-                        csv_data = self.convert_to_csv(table_data)
-                        csv_data_encoded = [[bytes(item) for item in row] for row in csv_data]  # Encode each item as bytes
-                        writer.writerows(csv_data_encoded)
+            if output_format == "json":
+                table_data_json = json.dumps(table_data, indent=4)
+                output_file_path = f"tables-{document.id}.json"
+                zipf.writestr(output_file_path, table_data_json)
+            if output_format == "csv":
+                output_file_path = f"tables-{document.id}.csv"
+                with zipf.open(output_file_path, "w") as csv_file:
+                    writer = csv.writer(csv_file)
+                    writer.writerow(["Page Number", "Row Index", "Column Index", "Content"])
+                csv_data = self.convert_to_csv(table_data)
+                self.save_to_csv(csv_data, csv_file)
+                zipf.write(csv_file)
 
         # Upload the zip file
         with open(zip_filename, "rb") as f:
