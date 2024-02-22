@@ -163,7 +163,8 @@ class TableExtractor(AddOn):
                         writer = csv.writer(csv_file)
                         writer.writerow([b"Page Number", b"Row Index", b"Column Index", b"Content"])
                         csv_data = self.convert_to_csv(table_data)
-                        writer.writerows(csv_data)
+                        csv_data_encoded = [[bytes(item) for item in row] for row in csv_data]  # Encode each item as bytes
+                        writer.writerows(csv_data_encoded)
 
         # Upload the zip file
         with open(zip_filename, "rb") as f:
