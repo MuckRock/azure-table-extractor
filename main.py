@@ -168,7 +168,8 @@ class TableExtractor(AddOn):
                 csv_data = self.convert_to_csv(table_data)
                 self.save_to_csv(csv_data, output_file_path)
                 zipf.write(output_file_path)
-
+        zipf.close() 
+        
         # Upload the zip file
         with open(zip_filename, "rb") as f:
             self.upload_file(f)
