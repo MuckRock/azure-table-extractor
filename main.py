@@ -161,8 +161,7 @@ class TableExtractor(AddOn):
                     output_file_path = f"tables-{document.id}.csv"
                     with zipf.open(output_file_path, "w") as csv_file:
                         writer = csv.writer(csv_file)
-                        if csv_file.tell() == 0:
-                            writer.writerow(["Page Number", "Row Index", "Column Index", "Content"])
+                        writer.writerow(["Page Number", "Row Index", "Column Index", "Content"])
                         csv_data = self.convert_to_csv(table_data)
                         writer.writerows(csv_data)
 
