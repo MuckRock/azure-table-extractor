@@ -82,6 +82,7 @@ class TableExtractor(AddOn):
 
     def download_image(self, url, filename):
         """Download an image from a URL and save it locally."""
+        print(url)
         response = requests.get(url)
         with open(filename, 'wb') as f:
             f.write(response.content)
