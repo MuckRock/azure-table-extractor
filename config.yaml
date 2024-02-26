@@ -6,12 +6,12 @@ documents:
   - selected
 properties:
   start_page:
-    title: Starting page number
+    title: Start page
     type: integer
     description: 'Page number where the table(s) begin'
     default: 1
   end_page:
-    title: Ending page number
+    title: End page
     type: integer
     description: 'Page number where table(s) end'
     default: 1
