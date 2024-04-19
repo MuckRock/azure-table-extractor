@@ -109,6 +109,7 @@ class TableExtractor(AddOn):
             for row_index, row_content in enumerate(rows):
                 csv_row = row_content
                 csv_data.append(csv_row)
+            csv_data.extend([[], []])
         return csv_data
 
     def save_to_csv(self, csv_data, csv_filepath):
