@@ -23,6 +23,14 @@ class TableExtractor(AddOn):
             start_page = self.data.get("start_page", 1)
             end_page = self.data.get("end_page")
             last_page = 0
+            if end_page is None:
+                self.set_message(
+                    f"No end page provided. Please provide one and try again."
+                )
+                sys.exit(1)
+            if end_page < start_page:
+                self.set_message("You provided an end page that is smaller than the start page. Try again.")
+                sys.exit(1)
             if end_page <= doc.page_count:
                 last_page = end_page
             else:
