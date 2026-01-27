@@ -8,3 +8,5 @@ jobs:
     secrets:
       token: ${{ secrets.FR_ENDPOINT }}
       key: ${{ secrets.FR_KEY }}
+    with:
+      timeout: 60
