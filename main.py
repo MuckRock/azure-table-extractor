@@ -128,6 +128,7 @@ class TableExtractor(AddOn):
 
     def main(self):
         """Validate, run the extraction on each document, save results in a zip file"""
+        self.client.session.headers.update({'User-Agent': 'Azure Table Extractor Add-On'})
         output_format = self.data.get("output_format", "json")
         start_page = self.data.get("start_page", 1)
         end_page = self.data.get("end_page", 1)
