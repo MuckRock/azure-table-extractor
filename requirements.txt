@@ -1,3 +1,4 @@
-python_documentcloud==4.0.1
+python_documentcloud==4.8.1
 azure-ai-formrecognizer
 Pillow
+python-squarelet==0.6.0
