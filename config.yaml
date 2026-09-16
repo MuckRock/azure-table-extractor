@@ -1,6 +1,8 @@
 title: 'Azure Table Extractor'
 description: 'Extract tables from your documents using Azure Document Intelligence.'
 instructions: ''
+disclosures: This Add-On sends data to a Microsoft Azure Document Intelligent endpoint which uses a form of machine learning to extract tables from documents. You may read their
+[privacy policy](https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/document-intelligence/data-privacy-security) to learn more.
 type: object
 documents:
   - selected
